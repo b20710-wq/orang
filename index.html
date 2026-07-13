@@ -207,16 +207,15 @@
 </div>
 
 <script>
-    // ⚠️ [필수] 아래 주소를 본인의 Firebase 데이터베이스 주소로 교체하세요!
+    // 🔗 제공해주신 본인의 실시간 Firebase 서버 주소 연동 완료!
     const firebaseConfig = { 
-        databaseURL: "https://your-firebase-db-demo.firebaseio.com" 
+        databaseURL: "https://rrrr-490a7-default-rtdb.firebaseio.com/" 
     };
     
-    if(!firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-        firebase.initializeApp(firebaseConfig);
-    }
+    // Firebase 연결 초기화
+    firebase.initializeApp(firebaseConfig);
 
-    // 🛠️ 요청하신 파워(+10~10000) 및 가격(100~100000) 10배 밸런스 데이터 셋업
+    // 요청하셨던 파워(+10~10000) 및 가격(100~100000) 10배 밸런스 데이터
     const upgrades = [
         { id: 'up_1', name: '브론즈 가속 칩', power: 10, cost: 100 },
         { id: 'up_2', name: '실버 연산 엔진', power: 100, cost: 1000 },
@@ -256,19 +255,11 @@
         }
     }
 
+    // 서버 기반 회원가입
     function handleRegister() {
         const id = document.getElementById('auth-id').value.trim();
         const pw = document.getElementById('auth-pw').value;
         if(!id || !pw) { alert('아이디와 비밀번호를 입력해 주십시오.'); return; }
-
-        if(firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-            if (localState.db[id]) { alert(`❌ 이미 존재하는 아이디입니다.`); return; }
-            localState.db[id] = { password: pw, money: 5000, goldPerClick: 1, purchased: [] };
-            saveLocalDB();
-            alert('가입 완료 (임시 로컬 저장)');
-            toggleToRegisterView(false);
-            return;
-        }
 
         const userRef = firebase.database().ref('users/' + id);
         userRef.once('value', (snap) => {
@@ -277,7 +268,7 @@
             } else {
                 userRef.set({ password: pw, money: 5000, goldPerClick: 1, purchased: [] }, (err) => {
                     if(!err) {
-                        alert('회원가입 성공!');
+                        alert('회원가입 성공! 로그인 하세요.');
                         toggleToRegisterView(false);
                     }
                 });
@@ -285,17 +276,11 @@
         });
     }
 
+    // 서버 기반 로그인
     function handleLogin() {
         const id = document.getElementById('auth-id').value.trim();
         const pw = document.getElementById('auth-pw').value;
         if(!id || !pw) { alert('정보 입력바람'); return; }
-
-        if(firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-            if (!localState.db[id] || localState.db[id].password !== pw) { alert('인증 실패'); return; }
-            localState.activeUser = id;
-            switchView('view-lobby'); syncLobbyUI(); renderShopPanels();
-            return;
-        }
 
         firebase.database().ref('users/' + id).once('value', (snap) => {
             const data = snap.val();
@@ -329,9 +314,7 @@
         const user = localState.db[localState.activeUser];
         user.money += user.goldPerClick;
         
-        if(!firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-            firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
-        }
+        firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
         saveLocalDB(); syncLobbyUI();
         
         if(e && e.clientX) {
@@ -379,9 +362,7 @@
             alert(`💥 꽝! 베팅금이 전부 소멸했습니다.`);
         }
         
-        if(!firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-            firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
-        }
+        firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
         amtInput.value = ''; saveLocalDB(); syncLobbyUI();
     }
 
@@ -397,7 +378,6 @@
         setTimeout(() => f.remove(), 550);
     }
 
-    // 상점 패널 렌더링 (다중 구매 및 파워 누적 시스템 반영)
     function renderShopPanels() {
         const user = localState.db[localState.activeUser];
         const upZone = document.getElementById('shop-upgrade');
@@ -414,24 +394,22 @@
         });
     }
 
-    // 아이템 구매 시 기존 파워에 수치가 중첩해서 더해지도록 최적화
     function buyUpgrade(id, cost, power) {
         const user = localState.db[localState.activeUser];
         if(user.money < cost) { alert('크레딧이 부족합니다.'); return; }
         
         user.money -= cost; 
-        user.goldPerClick += power; // 파워 누적 합산!
+        user.goldPerClick += power;
         if(!user.purchased) user.purchased = [];
         user.purchased.push(id);
 
-        if(!firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-            firebase.database().ref('users/' + localState.activeUser).update({
-                money: user.money, goldPerClick: user.goldPerClick, purchased: user.purchased
-            });
-        }
+        firebase.database().ref('users/' + localState.activeUser).update({
+            money: user.money, goldPerClick: user.goldPerClick, purchased: user.purchased
+        });
         saveLocalDB(); syncLobbyUI(); renderShopPanels();
     }
 
+    // 방식 [A] : 방 생성하기 (서버 등록)
     function createRoomAsHost() {
         const betInput = document.getElementById('battle-bet-input');
         const betAmount = parseInt(betInput.value);
@@ -444,12 +422,6 @@
         
         localState.currentBet = betAmount;
         currentRoomCode = generatedCode;
-
-        if(firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-            alert(`[연습 모드] 방 코드 [ ${generatedCode} ] 방이 개설되었습니다.`);
-            runLocalSimulationGame(generatedCode, betAmount);
-            return;
-        }
 
         networkRoomRef = firebase.database().ref('rooms/' + generatedCode);
         user.money -= betAmount; 
@@ -466,6 +438,7 @@
         });
     }
 
+    // 방식 [B] : 방 코드로 입장하기 (서버 탐색)
     function joinRoomAsGuest() {
         const roomCode = document.getElementById('battle-room-input').value.trim().toUpperCase();
         const betInput = document.getElementById('battle-bet-input');
@@ -477,20 +450,14 @@
         const user = localState.db[localState.activeUser];
         if(user.money < betAmount) { alert('잔액이 부족합니다.'); return; }
 
-        if(firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-            alert("봇 시뮬레이션 모드로 우회 실행합니다.");
-            runLocalSimulationGame(roomCode, betAmount);
-            return;
-        }
-
         localState.currentBet = betAmount;
         currentRoomCode = roomCode;
 
         networkRoomRef = firebase.database().ref('rooms/' + roomCode);
         networkRoomRef.once('value', (snapshot) => {
             const data = snapshot.val();
-            if(!data) { alert("존재하지 않는 방 코드입니다."); return; }
-            if(data.p2) { alert("이미 풀방입니다."); return; }
+            if(!data) { alert("존재하지 않는 방 코드입니다. 다시 확인해 주세요."); return; }
+            if(data.p2) { alert("이미 가득 찬 방입니다."); return; }
 
             user.money -= betAmount; 
             firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
@@ -504,6 +471,7 @@
         });
     }
 
+    // 실시간 동기화 스트림 리스너
     function listenRoomStream() {
         networkRoomRef.on('value', (snapshot) => {
             const data = snapshot.val();
@@ -579,12 +547,6 @@
     }
 
     function exitGameRoomByPlayer() {
-        if (firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
-            localState.db[localState.activeUser].money += localState.currentBet;
-            saveLocalDB(); syncLobbyUI(); exitGameRoom();
-            return;
-        }
-
         if(!networkRoomRef) return;
         networkRoomRef.once('value', (snapshot) => {
             const data = snapshot.val();
@@ -609,19 +571,6 @@
         if(networkRoomRef) { networkRoomRef.off(); networkRoomRef = null; }
         document.getElementById('battle-action-zone').style.pointerEvents = 'none';
         switchView('view-lobby');
-    }
-
-    function runLocalSimulationGame(code, bet) {
-        document.getElementById('game-room-id').innerText = `ROOM : ${code} (SIM)`;
-        document.getElementById('game-p1-name').innerText = localState.activeUser;
-        document.getElementById('game-p2-name').innerText = "CPU_BOT";
-        document.getElementById('game-mybet-view').innerText = bet.toLocaleString();
-        
-        localState.db[localState.activeUser].money -= bet;
-        saveLocalDB(); syncLobbyUI();
-        switchView('view-game');
-        document.getElementById('battle-action-zone').style.pointerEvents = 'auto';
-        document.getElementById('game-dice-view').innerText = "READY TO PLAY";
     }
 </script>
 </body>

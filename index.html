@@ -2,126 +2,90 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <title>DOWNLOADER</title>
+    <style>
+        body { background: #0b0d19; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { text-align: center; padding: 40px; border: 3px solid #00f0ff; background: #121626; box-shadow: 0 0 20px rgba(0,240,255,0.3); border-radius: 8px; }
+        .btn { background: #ff007f; color: white; border: none; padding: 20px 40px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0 #99004c; text-transform: uppercase; border-radius: 4px; }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #99004c; }
+        p { color: #8fa0dd; margin-top: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2 style="color:#00f0ff; margin-bottom:30px;">🕹️ 멀티플레이 아케이드 게임 원클릭 다운로드</h2>
+        <button class="btn" onclick="downloadGameFile()">🎮 루미큐브 게임 파일 다운로드하기</button>
+        <p>버튼을 누르면 즉시 'game.html' 파일이 저장됩니다.<br>다운로드 후 마우스 우클릭 -> 메모장으로 열어서 서버 주소를 넣어주세요!</p>
+    </div>
+
+    <script>
+        function downloadGameFile() {
+            // 원본 게임 소스코드 문자열 생성
+            const gameCode = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCADE MULTI ARENA</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"><\/script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"><\/script>
     <style>
-        :root {
-            --bg-main: #0b0d19;
-            --panel-bg: #121626;
-            --panel-secondary: #1a1f36;
-            --accent: #ff007f;
-            --accent-cyan: #00f0ff;
-            --text-main: #ffffff;
-            --text-muted: #8fa0dd;
-            --gold: #ffea00;
-            --border: #252b48;
-            --success: #39ff14;
-        }
-
+        :root { --bg-main: #0b0d19; --panel-bg: #121626; --panel-secondary: #1a1f36; --accent: #ff007f; --accent-cyan: #00f0ff; --text-main: #ffffff; --text-muted: #8fa0dd; --gold: #ffea00; --border: #252b48; --success: #39ff14; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace, sans-serif; }
-        
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        .app-container {
-            width: 95vw;
-            max-width: 1100px;
-            height: 85vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .view {
-            display: none;
-            background: var(--panel-bg);
-            border: 3px solid var(--accent-cyan);
-            border-radius: 4px;
-            padding: 30px;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.1);
-            height: 100%;
-            overflow: hidden;
-        }
-        
+        body { background-color: var(--bg-main); color: var(--text-main); width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 40px 40px; }
+        .app-container { width: 95vw; max-width: 1100px; height: 85vh; display: flex; flex-direction: column; }
+        .view { display: none; background: var(--panel-bg); border: 3px solid var(--accent-cyan); border-radius: 4px; padding: 30px; box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.1); height: 100%; overflow: hidden; }
         #view-auth { max-width: 450px; margin: 0 auto; height: auto; align-self: center; border-color: var(--accent); box-shadow: 0 0 20px rgba(255, 0, 127, 0.2); }
         .view.active { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
         #view-auth.active { display: block; }
-
         h1 { font-size: 32px; font-weight: 900; text-align: center; margin-bottom: 8px; color: var(--accent-cyan); text-shadow: 0 0 8px var(--accent-cyan); letter-spacing: 2px; }
         .subtitle { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 25px; text-transform: uppercase; }
-        
         .lobby-left { display: flex; flex-direction: column; gap: 20px; border-right: 2px dashed var(--border); padding-right: 30px; }
         .lobby-right { display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px; }
-
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; color: var(--accent-cyan); margin-bottom: 6px; font-weight: bold; }
         .form-group input { width: 100%; background: var(--bg-main); border: 2px solid var(--border); padding: 12px; color: #fff; font-size: 14px; }
         .form-group input:focus { border-color: var(--accent); outline: none; }
-
         .btn { width: 100%; background: var(--accent); color: #fff; border: none; padding: 14px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; box-shadow: 3px 3px 0px #99004c; margin-bottom: 10px; }
         .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px #99004c; }
         .btn-secondary { background: transparent; border: 2px solid var(--border); color: var(--text-main); box-shadow: none; }
         .btn-secondary:hover { background: var(--panel-secondary); }
         .btn-register { background: var(--accent-cyan); color: #000; box-shadow: 3px 3px 0px #0099a6; }
         .btn-register:active { box-shadow: 1px 1px 0px #0099a6; }
-
         .user-card { background: var(--bg-main); padding: 15px; border: 2px solid var(--border); display: flex; flex-direction: column; gap: 5px; }
         .money-display { color: var(--gold); font-weight: bold; font-size: 24px; text-shadow: 0 0 5px rgba(255,234,0,0.5); }
-
         .clicker-box { background: var(--panel-secondary); border: 2px solid var(--accent-cyan); padding: 25px; text-align: center; cursor: pointer; user-select: none; position: relative; }
         .clicker-box:hover, .clicker-box.active-press { background: var(--border); }
-
         .gamble-box { background: #26121f; border: 2px solid var(--accent); padding: 20px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px; }
         .gamble-input { width: 100%; padding: 8px; background: var(--bg-main); border: 1px solid var(--accent); color: #fff; font-weight: bold; text-align: center; }
-
         .section-title { font-size: 14px; font-weight: bold; color: var(--accent-cyan); letter-spacing: 1px; }
         .menu-row { background: var(--panel-secondary); padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 2px solid var(--border); }
-
         .shop-list { display: flex; flex-direction: column; gap: 10px; margin-top: 5px; }
         .item-card { background: var(--bg-main); border: 2px solid var(--border); padding: 14px; display: flex; justify-content: space-between; align-items: center; }
         .btn-buy { width: auto; padding: 8px 16px; font-size: 12px; background: var(--accent-cyan); color: #000; font-weight: bold; border: none; cursor: pointer; }
         .btn-buy:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; box-shadow: none; }
-
         #view-game.active { display: flex; flex-direction: column; align-items: center; max-width: 700px; margin: 0 auto; }
         .versus-layout { display: flex; justify-content: space-between; width: 100%; margin: 25px 0; background: var(--panel-secondary); padding: 20px; border: 2px solid var(--border); }
         .vs-player { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 45%; padding: 10px; background: var(--bg-main); border: 1px solid var(--border); }
         .dice-zone { font-size: 32px; margin: 20px 0; height: 50px; color: var(--gold); font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px var(--gold); }
-        
         .bet-actions { display: flex; gap: 15px; width: 100%; margin-top: 15px; }
         .btn-bet { flex: 1; padding: 16px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; color: #000; text-transform: uppercase; }
-        
         .floating-g { position: absolute; color: var(--accent-cyan); font-weight: bold; font-size: 20px; pointer-events: none; animation: floatUp 0.4s ease-out forwards; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-30px); } }
     </style>
 </head>
 <body>
-
 <div class="app-container">
-
     <div id="view-auth" class="view active">
         <h1 id="auth-title">ARCADE AUTH</h1>
         <div class="subtitle" id="auth-subtitle">INSERT COIN TO ENTER ARENA</div>
         <form onsubmit="return false;">
             <div class="form-group"><label>USER ID</label><input type="text" id="auth-id" required></div>
             <div class="form-group"><label>PASSWORD</label><input type="password" id="auth-pw" required></div>
-            
             <div id="group-login-btns">
                 <button type="button" class="btn" onclick="handleLogin()">LOGIN</button>
                 <button type="button" class="btn btn-secondary" onclick="toggleToRegisterView(true)">GO TO REGISTER (회원가입 창으로)</button>
             </div>
-
             <div id="group-register-btns" style="display: none;">
                 <button type="button" class="btn btn-register" onclick="handleRegister()">CREATE ACCOUNT (가입하기)</button>
                 <button type="button" class="btn btn-secondary" onclick="toggleToRegisterView(false)">BACK TO LOGIN (로그인으로 돌아가기)</button>
@@ -135,41 +99,33 @@
                 <div id="lobby-username" style="font-weight:bold; color:var(--accent-cyan);">PLAYER: NONE</div>
                 <div class="money-display"><span id="lobby-money">0</span> CREDITS</div>
             </div>
-
             <div class="clicker-box" id="click-pad" onclick="triggerClick(event)">
                 <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color:var(--accent-cyan);">[ CLICK OR PRESS SPACEBAR ]</div>
                 <div style="font-size: 12px; color: var(--text-muted)">POWER: +<span id="lobby-power" style="color:var(--gold);">1</span></div>
             </div>
-
             <div class="gamble-box">
                 <div style="font-size: 13px; font-weight: bold; color: var(--accent);">[ 20% CHANCE 10X MULTIPLIER ]</div>
                 <input type="number" id="gamble-amount-input" class="gamble-input" placeholder="베팅할 금액 입력">
                 <button class="btn" onclick="triggerGambleBet(event)">RISK BET</button>
             </div>
-
             <button class="btn btn-secondary" onclick="logout()">LOGOUT</button>
         </div>
 
         <div class="lobby-right">
             <div class="section-title">⚔️ REALTIME MULTIPLAYER ARENA</div>
-            
             <div class="menu-row" style="border-color: var(--gold);">
                 <label style="font-size:12px; color:var(--gold); font-weight:bold;">1. 판돈 설정 (공통 필수)</label>
                 <input type="number" id="battle-bet-input" placeholder="경기에 걸고 들어갈 크레딧 액수" style="padding:10px; background:var(--bg-main); border:1px solid var(--border); color:#fff;">
             </div>
-
             <div class="menu-row" style="border-color: var(--accent-cyan);">
                 <label style="font-size:12px; color:var(--accent-cyan); font-weight:bold;">방식 [A] 내가 방장으로 방 만들기</label>
-                <div style="font-size:12px; color:var(--text-muted);">무작위 고유 코드가 자동으로 생성됩니다.</div>
                 <button class="btn" style="background:var(--accent-cyan); color:#000;" onclick="createRoomAsHost()">CREATE NEW ROOM (방 만들기)</button>
             </div>
-
             <div class="menu-row" style="border-color: var(--accent);">
                 <label style="font-size:12px; color:var(--accent); font-weight:bold;">방식 [B] 친구 방으로 입장하기</label>
                 <input type="text" id="battle-room-input" placeholder="친구에게 받은 방 코드 6자리 입력" style="padding:10px; background:var(--bg-main); border:1px solid var(--border); color:#fff;">
                 <button class="btn" style="background:var(--accent);" onclick="joinRoomAsGuest()">JOIN EXISTING ROOM (방 코드로 입장)</button>
             </div>
-
             <div class="section-title" style="margin-top:10px;">UPGRADE HARDWARE SHOP (아이템 구매)</div>
             <div id="shop-upgrade" class="shop-list"></div>
         </div>
@@ -178,7 +134,6 @@
     <div id="view-game" class="view">
         <h1>BATTLE ARENA</h1>
         <div class="subtitle" id="game-room-id">ROOM CODE</div>
-
         <div class="versus-layout">
             <div class="vs-player">
                 <div id="game-p1-name" style="font-weight:bold; color:var(--accent-cyan);">PLAYER 1</div>
@@ -190,32 +145,25 @@
                 <div id="game-p2-status" style="font-size:14px; color:var(--accent);">READY</div>
             </div>
         </div>
-
         <div style="text-align:center; width:100%;">
             <div id="game-round-title" style="font-size:18px; font-weight:bold; color:var(--gold);">ROUND 1</div>
             <div class="dice-zone" id="game-dice-view">상대방 대기 중...</div>
             <div style="font-size:14px; margin-bottom:15px; color:var(--accent-cyan);">나의 배팅금: <span id="game-mybet-view" style="font-weight:bold; color:var(--gold);">0</span> CREDITS</div>
         </div>
-
         <div class="bet-actions" id="battle-action-zone" style="pointer-events: none;">
             <button class="btn-bet" style="background:var(--accent-cyan);" onclick="sendPlayerChoice('홀')">ODD (홀)</button>
             <button class="btn-bet" style="background:var(--accent);" onclick="sendPlayerChoice('EVEN')">EVEN (짝)</button>
         </div>
         <button class="btn btn-secondary" style="margin-top:20px; border-color: var(--accent); color: var(--accent);" onclick="exitGameRoomByPlayer()">FORFEIT MATCH (방 나가기)</button>
     </div>
-
 </div>
 
 <script>
-    // 🔗 제공해주신 본인의 실시간 Firebase 서버 주소 연동 완료!
     const firebaseConfig = { 
-        databaseURL: "https://rrrr-490a7-default-rtdb.firebaseio.com/" 
+        databaseURL: "https://your-firebase-db-demo.firebaseio.com" 
     };
-    
-    // Firebase 연결 초기화
-    firebase.initializeApp(firebaseConfig);
+    if(!firebaseConfig.databaseURL.includes("your-firebase-db-demo")) { firebase.initializeApp(firebaseConfig); }
 
-    // 요청하셨던 파워(+10~10000) 및 가격(100~100000) 10배 밸런스 데이터
     const upgrades = [
         { id: 'up_1', name: '브론즈 가속 칩', power: 10, cost: 100 },
         { id: 'up_2', name: '실버 연산 엔진', power: 100, cost: 1000 },
@@ -223,355 +171,181 @@
         { id: 'up_4', name: '다이아 양자 코어', power: 10000, cost: 100000 }
     ];
 
-    let localState = {
-        db: JSON.parse(localStorage.getItem('arcade_bet_v11')) || {},
-        activeUser: null,
-        currentBet: 0
-    };
-
-    let networkRoomRef = null;
-    let currentRoomCode = null;
+    let localState = { db: JSON.parse(localStorage.getItem('arcade_bet_v11')) || {}, activeUser: null, currentBet: 0 };
+    let networkRoomRef = null; let currentRoomCode = null;
 
     function toggleToRegisterView(isRegister) {
-        const title = document.getElementById('auth-title');
-        const subtitle = document.getElementById('auth-subtitle');
-        const loginBtns = document.getElementById('group-login-btns');
-        const registerBtns = document.getElementById('group-register-btns');
-        document.getElementById('auth-id').value = '';
-        document.getElementById('auth-pw').value = '';
-
-        if(isRegister) {
-            title.innerText = "CREATE ACCOUNT";
-            title.style.color = "var(--accent-cyan)";
-            subtitle.innerText = "REGISTRATION MODE";
-            loginBtns.style.display = "none";
-            registerBtns.style.display = "block";
-        } else {
-            title.innerText = "ARCADE AUTH";
-            title.style.color = "var(--accent)";
-            subtitle.innerText = "INSERT COIN TO ENTER ARENA";
-            loginBtns.style.display = "block";
-            registerBtns.style.display = "none";
-        }
+        const title = document.getElementById('auth-title'); const subtitle = document.getElementById('auth-subtitle');
+        const loginBtns = document.getElementById('group-login-btns'); const registerBtns = document.getElementById('group-register-btns');
+        document.getElementById('auth-id').value = ''; document.getElementById('auth-pw').value = '';
+        if(isRegister) { title.innerText = "CREATE ACCOUNT"; title.style.color = "var(--accent-cyan)"; subtitle.innerText = "REGISTRATION MODE"; loginBtns.style.display = "none"; registerBtns.style.display = "block"; }
+        else { title.innerText = "ARCADE AUTH"; title.style.color = "var(--accent)"; subtitle.innerText = "INSERT COIN TO ENTER ARENA"; loginBtns.style.display = "block"; registerBtns.style.display = "none"; }
     }
 
-    // 서버 기반 회원가입
     function handleRegister() {
-        const id = document.getElementById('auth-id').value.trim();
-        const pw = document.getElementById('auth-pw').value;
+        const id = document.getElementById('auth-id').value.trim(); const pw = document.getElementById('auth-pw').value;
         if(!id || !pw) { alert('아이디와 비밀번호를 입력해 주십시오.'); return; }
-
+        if(firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
+            if (localState.db[id]) { alert('❌ 이미 존재하는 아이디입니다.'); return; }
+            localState.db[id] = { password: pw, money: 5000, goldPerClick: 1, purchased: [] }; saveLocalDB();
+            alert('가입 완료 (임시 로컬 저장)'); toggleToRegisterView(false); return;
+        }
         const userRef = firebase.database().ref('users/' + id);
         userRef.once('value', (snap) => {
-            if(snap.exists()) {
-                alert(`❌ 이미 가입된 아이디(${id})입니다. 다른 아이디를 만드세요!`);
-            } else {
-                userRef.set({ password: pw, money: 5000, goldPerClick: 1, purchased: [] }, (err) => {
-                    if(!err) {
-                        alert('회원가입 성공! 로그인 하세요.');
-                        toggleToRegisterView(false);
-                    }
-                });
-            }
+            if(snap.exists()) { alert('❌ 이미 가입된 아이디입니다.'); }
+            else { userRef.set({ password: pw, money: 5000, goldPerClick: 1, purchased: [] }, (err) => { if(!err) { alert('회원가입 성공!'); toggleToRegisterView(false); } }); }
         });
     }
 
-    // 서버 기반 로그인
     function handleLogin() {
-        const id = document.getElementById('auth-id').value.trim();
-        const pw = document.getElementById('auth-pw').value;
+        const id = document.getElementById('auth-id').value.trim(); const pw = document.getElementById('auth-pw').value;
         if(!id || !pw) { alert('정보 입력바람'); return; }
-
+        if(firebaseConfig.databaseURL.includes("your-firebase-db-demo")) {
+            if (!localState.db[id] || localState.db[id].password !== pw) { alert('인증 실패'); return; }
+            localState.activeUser = id; switchView('view-lobby'); syncLobbyUI(); renderShopPanels(); return;
+        }
         firebase.database().ref('users/' + id).once('value', (snap) => {
             const data = snap.val();
-            if(data && data.password === pw) {
-                localState.activeUser = id;
-                localState.db[id] = data;
-                switchView('view-lobby'); syncLobbyUI(); renderShopPanels();
-            } else {
-                alert('아이디 혹은 비밀번호가 틀립니다.');
-            }
+            if(data && data.password === pw) { localState.activeUser = id; localState.db[id] = data; switchView('view-lobby'); syncLobbyUI(); renderShopPanels(); }
+            else { alert('아이디 혹은 비밀번호가 틀립니다.'); }
         });
     }
 
     function logout() { localState.activeUser = null; switchView('view-auth'); toggleToRegisterView(false); }
     function saveLocalDB() { localStorage.setItem('arcade_bet_v11', JSON.stringify(localState.db)); }
-    
-    function switchView(id) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
+    function switchView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
     function syncLobbyUI() {
         const user = localState.db[localState.activeUser];
-        document.getElementById('lobby-username').innerText = `PLAYER: ${localState.activeUser}`;
+        document.getElementById('lobby-username').innerText = 'PLAYER: ' + localState.activeUser;
         document.getElementById('lobby-money').innerText = user.money.toLocaleString();
         document.getElementById('lobby-power').innerText = user.goldPerClick.toLocaleString();
     }
 
     function triggerClick(e) {
-        if(!localState.activeUser) return;
-        const user = localState.db[localState.activeUser];
-        user.money += user.goldPerClick;
-        
-        firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
+        if(!localState.activeUser) return; const user = localState.db[localState.activeUser]; user.money += user.goldPerClick;
+        if(!firebaseConfig.databaseURL.includes("your-firebase-db-demo")) { firebase.database().ref('users/' + localState.activeUser).update({ money: user.money }); }
         saveLocalDB(); syncLobbyUI();
-        
-        if(e && e.clientX) {
-            createFloatingText(e.clientX, e.clientY, `+${user.goldPerClick}`, 'click-pad');
-        } else {
-            const pad = document.getElementById('click-pad');
-            const rect = pad.getBoundingClientRect();
-            createFloatingText(rect.left + (rect.width / 2), rect.top + (rect.height / 2), `+${user.goldPerClick}`, 'click-pad');
-        }
+        if(e && e.clientX) { createFloatingText(e.clientX, e.clientY, '+' + user.goldPerClick, 'click-pad'); }
+        else { const pad = document.getElementById('click-pad'); const rect = pad.getBoundingClientRect(); createFloatingText(rect.left + (rect.width / 2), rect.top + (rect.height / 2), '+' + user.goldPerClick, 'click-pad'); }
     }
 
-    window.addEventListener('keydown', function(e) {
-        if(document.activeElement.tagName === 'INPUT') return;
-        if(e.code === 'Space' || e.keyCode === 32) {
-            e.preventDefault();
-            if(document.getElementById('view-lobby').classList.contains('active') && localState.activeUser) {
-                document.getElementById('click-pad').classList.add('active-press');
-                triggerClick(null);
-            }
-        }
-    });
-
-    window.addEventListener('keyup', function(e) {
-        if(e.code === 'Space' || e.keyCode === 32) {
-            document.getElementById('click-pad').classList.remove('active-press');
-        }
-    });
+    window.addEventListener('keydown', function(e) { if(document.activeElement.tagName === 'INPUT') return; if(e.code === 'Space' || e.keyCode === 32) { e.preventDefault(); if(document.getElementById('view-lobby').classList.contains('active') && localState.activeUser) { document.getElementById('click-pad').classList.add('active-press'); triggerClick(null); } } });
+    window.addEventListener('keyup', function(e) { if(e.code === 'Space' || e.keyCode === 32) { document.getElementById('click-pad').classList.remove('active-press'); } });
 
     function triggerGambleBet(e) {
-        if(!localState.activeUser) return;
-        const user = localState.db[localState.activeUser];
-        const amtInput = document.getElementById('gamble-amount-input');
-        const betAmount = parseInt(amtInput.value);
-
-        if(isNaN(betAmount) || betAmount <= 0) { alert('액수를 입력하세요.'); return; }
-        if(user.money < betAmount) { alert('크레딧 부족'); return; }
-
-        user.money -= betAmount; 
-        const isSuccess = Math.random() < 0.20; 
-        if(isSuccess) {
-            const jackpot = betAmount * 10; 
-            user.money += jackpot;
-            alert(`🎰 잭팟!! 10배 크레딧 획득!: +${jackpot.toLocaleString()}`);
-        } else {
-            alert(`💥 꽝! 베팅금이 전부 소멸했습니다.`);
-        }
-        
-        firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
+        if(!localState.activeUser) return; const user = localState.db[localState.activeUser]; const amtInput = document.getElementById('gamble-amount-input'); const betAmount = parseInt(amtInput.value);
+        if(isNaN(betAmount) || betAmount <= 0) { alert('액수를 입력하세요.'); return; } if(user.money < betAmount) { alert('크레딧 부족'); return; }
+        user.money -= betAmount; const isSuccess = Math.random() < 0.20;
+        if(isSuccess) { const jackpot = betAmount * 10; user.money += jackpot; alert('🎰 잭팟!! 10배 크레딧 획득!: +' + jackpot.toLocaleString()); }
+        else { alert('💥 꽝! 베팅금이 전부 소멸했습니다.'); }
+        if(!firebaseConfig.databaseURL.includes("your-firebase-db-demo")) { firebase.database().ref('users/' + localState.activeUser).update({ money: user.money }); }
         amtInput.value = ''; saveLocalDB(); syncLobbyUI();
     }
 
-    function createFloatingText(clientX, clientY, text, parentId) {
-        const parent = document.getElementById(parentId);
-        const rect = parent.getBoundingClientRect();
-        const f = document.createElement('div');
-        f.className = 'floating-g';
-        f.style.left = `${clientX - rect.left}px`;
-        f.style.top = `${clientY - rect.top}px`;
-        f.innerText = text;
-        parent.appendChild(f);
-        setTimeout(() => f.remove(), 550);
-    }
+    function createFloatingText(clientX, clientY, text, parentId) { const parent = document.getElementById(parentId); const rect = parent.getBoundingClientRect(); const f = document.createElement('div'); f.className = 'floating-g'; f.style.left = (clientX - rect.left) + 'px'; f.style.top = (clientY - rect.top) + 'px'; f.innerText = text; parent.appendChild(f); setTimeout(() => f.remove(), 550); }
 
     function renderShopPanels() {
-        const user = localState.db[localState.activeUser];
-        const upZone = document.getElementById('shop-upgrade');
-        upZone.innerHTML = '';
-        
+        const user = localState.db[localState.activeUser]; const upZone = document.getElementById('shop-upgrade'); upZone.innerHTML = '';
         upgrades.forEach(item => {
             const isPurchased = user.purchased ? user.purchased.includes(item.id) : false;
-            let btnText = isPurchased ? "구매 완료 (적용됨)" : `${item.cost.toLocaleString()} CREDITS`;
-            const card = document.createElement('div');
-            card.className = 'item-card';
-            card.innerHTML = `<div><b>${item.name}</b><br><span style="font-size:12px; color:var(--accent-cyan);">클릭 파워 누적 +${item.power.toLocaleString()}</span></div>
-                <button class="btn-buy" ${isPurchased ? 'disabled' : ''} onclick="buyUpgrade('${item.id}', ${item.cost}, ${item.power})">${btnText}</button>`;
+            let btnText = isPurchased ? "구매 완료 (적용됨)" : item.cost.toLocaleString() + " CREDITS";
+            const card = document.createElement('div'); card.className = 'item-card';
+            card.innerHTML = '<div><b>'+item.name+'</b><br><span style="font-size:12px; color:var(--accent-cyan);">클릭 파워 누적 +'+item.power.toLocaleString()+'</span></div><button class="btn-buy" '+(isPurchased ? 'disabled' : '')+' onclick="buyUpgrade(\''+item.id+'\','+item.cost+','+item.power+')">'+btnText+'</button>';
             upZone.appendChild(card);
         });
     }
 
     function buyUpgrade(id, cost, power) {
-        const user = localState.db[localState.activeUser];
-        if(user.money < cost) { alert('크레딧이 부족합니다.'); return; }
-        
-        user.money -= cost; 
-        user.goldPerClick += power;
-        if(!user.purchased) user.purchased = [];
-        user.purchased.push(id);
-
-        firebase.database().ref('users/' + localState.activeUser).update({
-            money: user.money, goldPerClick: user.goldPerClick, purchased: user.purchased
-        });
+        const user = localState.db[localState.activeUser]; if(user.money < cost) { alert('크레딧이 부족합니다.'); return; }
+        user.money -= cost; user.goldPerClick += power; if(!user.purchased) user.purchased = []; user.purchased.push(id);
+        if(!firebaseConfig.databaseURL.includes("your-firebase-db-demo")) { firebase.database().ref('users/' + localState.activeUser).update({ money: user.money, goldPerClick: user.goldPerClick, purchased: user.purchased }); }
         saveLocalDB(); syncLobbyUI(); renderShopPanels();
     }
 
-    // 방식 [A] : 방 생성하기 (서버 등록)
     function createRoomAsHost() {
-        const betInput = document.getElementById('battle-bet-input');
-        const betAmount = parseInt(betInput.value);
-
+        const betInput = document.getElementById('battle-bet-input'); const betAmount = parseInt(betInput.value);
         if(isNaN(betAmount) || betAmount <= 0) { alert('상단에 배팅할 판돈 크레딧을 먼저 써주세요.'); return; }
-        const user = localState.db[localState.activeUser];
-        if(user.money < betAmount) { alert('잔액이 부족합니다.'); return; }
-
-        const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        
-        localState.currentBet = betAmount;
-        currentRoomCode = generatedCode;
-
-        networkRoomRef = firebase.database().ref('rooms/' + generatedCode);
-        user.money -= betAmount; 
-        firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
-        saveLocalDB(); syncLobbyUI();
-
-        networkRoomRef.set({
-            code: generatedCode, p1: localState.activeUser, p1Bet: betAmount,
-            p2: '', p2Bet: 0, round: 1, p1Choice: '', p2Choice: '', dice: 'READY', status: 'waiting'
-        }).then(() => {
-            listenRoomStream();
-            switchView('view-game');
-            document.getElementById('game-mybet-view').innerText = localState.currentBet.toLocaleString();
-        });
+        const user = localState.db[localState.activeUser]; if(user.money < betAmount) { alert('잔액이 부족합니다.'); return; }
+        const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase(); localState.currentBet = betAmount; currentRoomCode = generatedCode;
+        if(firebaseConfig.databaseURL.includes("your-firebase-db-demo")) { alert('[연습 모드] 방 코드 [ ' + generatedCode + ' ] 개설.'); runLocalSimulationGame(generatedCode, betAmount); return; }
+        networkRoomRef = firebase.database().ref('rooms/' + generatedCode); user.money -= betAmount; firebase.database().ref('users/' + localState.activeUser).update({ money: user.money }); saveLocalDB(); syncLobbyUI();
+        networkRoomRef.set({ code: generatedCode, p1: localState.activeUser, p1Bet: betAmount, p2: '', p2Bet: 0, round: 1, p1Choice: '', p2Choice: '', dice: 'READY', status: 'waiting' }).then(() => { listenRoomStream(); switchView('view-game'); document.getElementById('game-mybet-view').innerText = localState.currentBet.toLocaleString(); });
     }
 
-    // 방식 [B] : 방 코드로 입장하기 (서버 탐색)
     function joinRoomAsGuest() {
-        const roomCode = document.getElementById('battle-room-input').value.trim().toUpperCase();
-        const betInput = document.getElementById('battle-bet-input');
-        const betAmount = parseInt(betInput.value);
-
-        if(!roomCode) { alert('친구가 알려준 방 코드를 입력 칸에 써주세요.'); return; }
-        if(isNaN(betAmount) || betAmount <= 0) { alert('상단에 걸고 들어갈 판돈 크레딧을 먼저 써주세요.'); return; }
-        
-        const user = localState.db[localState.activeUser];
-        if(user.money < betAmount) { alert('잔액이 부족합니다.'); return; }
-
-        localState.currentBet = betAmount;
-        currentRoomCode = roomCode;
-
-        networkRoomRef = firebase.database().ref('rooms/' + roomCode);
+        const roomCode = document.getElementById('battle-room-input').value.trim().toUpperCase(); const betInput = document.getElementById('battle-bet-input'); const betAmount = parseInt(betInput.value);
+        if(!roomCode) { alert('방 코드를 입력하세요.'); return; } if(isNaN(betAmount) || betAmount <= 0) { alert('판돈 크레딧을 입력하세요.'); return; }
+        const user = localState.db[localState.activeUser]; if(user.money < betAmount) { alert('잔액 부족.'); return; }
+        if(firebaseConfig.databaseURL.includes("your-firebase-db-demo")) { runLocalSimulationGame(roomCode, betAmount); return; }
+        localState.currentBet = betAmount; currentRoomCode = roomCode; networkRoomRef = firebase.database().ref('rooms/' + roomCode);
         networkRoomRef.once('value', (snapshot) => {
-            const data = snapshot.val();
-            if(!data) { alert("존재하지 않는 방 코드입니다. 다시 확인해 주세요."); return; }
-            if(data.p2) { alert("이미 가득 찬 방입니다."); return; }
-
-            user.money -= betAmount; 
-            firebase.database().ref('users/' + localState.activeUser).update({ money: user.money });
-            saveLocalDB(); syncLobbyUI();
-
-            networkRoomRef.update({ p2: localState.activeUser, p2Bet: betAmount, status: 'playing' }).then(() => {
-                listenRoomStream();
-                switchView('view-game');
-                document.getElementById('game-mybet-view').innerText = localState.currentBet.toLocaleString();
-            });
+            const data = snapshot.val(); if(!data) { alert("존재하지 않는 방입니다."); return; } if(data.p2) { alert("풀방입니다."); return; }
+            user.money -= betAmount; firebase.database().ref('users/' + localState.activeUser).update({ money: user.money }); saveLocalDB(); syncLobbyUI();
+            networkRoomRef.update({ p2: localState.activeUser, p2Bet: betAmount, status: 'playing' }).then(() => { listenRoomStream(); switchView('view-game'); document.getElementById('game-mybet-view').innerText = localState.currentBet.toLocaleString(); });
         });
     }
 
-    // 실시간 동기화 스트림 리스너
     function listenRoomStream() {
         networkRoomRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if(!data) { exitGameRoom(); return; }
-
-            document.getElementById('game-room-id').innerText = `ROOM CODE : ${data.code}`;
-            document.getElementById('game-p1-name').innerText = data.p1 ? `방장(P1): ${data.p1}` : 'WAITING...';
-            document.getElementById('game-p2-name').innerText = data.p2 ? `참가(P2): ${data.p2}` : 'WAITING...';
-            document.getElementById('game-round-title').innerText = `ROUND ${data.round} / 3`;
+            const data = snapshot.val(); if(!data) { exitGameRoom(); return; }
+            document.getElementById('game-room-id').innerText = 'ROOM CODE : ' + data.code;
+            document.getElementById('game-p1-name').innerText = data.p1 ? '방장(P1): ' + data.p1 : 'WAITING...';
+            document.getElementById('game-p2-name').innerText = data.p2 ? '참가(P2): ' + data.p2 : 'WAITING...';
+            document.getElementById('game-round-title').innerText = 'ROUND ' + data.round + ' / 3';
             document.getElementById('game-dice-view').innerText = data.dice;
-
             document.getElementById('game-p1-status').innerText = data.p1Choice ? "선택 완료 🔒" : "선택 중...";
             document.getElementById('game-p2-status').innerText = data.p2Choice ? "선택 완료 🔒" : "선택 중...";
-
-            if(data.p1 && data.p2) {
-                document.getElementById('battle-action-zone').style.pointerEvents = 'auto';
-                if(data.dice === 'READY' || data.dice === '상대방 대기 중...') {
-                    document.getElementById('game-dice-view').innerText = "배틀 시작! 홀/짝을 고르세요.";
-                }
-            } else {
-                document.getElementById('battle-action-zone').style.pointerEvents = 'none';
-                document.getElementById('game-dice-view').innerText = "친구를 기다리는 중... 코드 복사해서 전달하세요.";
-            }
-
-            if(data.p1Choice && data.p2Choice && data.p1 === localState.activeUser && data.dice.indexOf('RESULT') === -1) {
-                executeNetworkRoundEnd(data);
-            }
+            if(data.p1 && data.p2) { document.getElementById('battle-action-zone').style.pointerEvents = 'auto'; if(data.dice === 'READY' || data.dice === '상대방 대기 중...') { document.getElementById('game-dice-view').innerText = "배틀 시작! 홀/짝을 고르세요."; } }
+            else { document.getElementById('battle-action-zone').style.pointerEvents = 'none'; document.getElementById('game-dice-view').innerText = "친구 대기 중... 코드를 복사해 주세오."; }
+            if(data.p1Choice && data.p2Choice && data.p1 === localState.activeUser && data.dice.indexOf('RESULT') === -1) { executeNetworkRoundEnd(data); }
         });
     }
 
-    function sendPlayerChoice(choice) {
-        if(!networkRoomRef) return;
-        networkRoomRef.once('value', (snapshot) => {
-            const data = snapshot.val();
-            if(data.p1 === localState.activeUser) networkRoomRef.update({ p1Choice: choice });
-            else if(data.p2 === localState.activeUser) networkRoomRef.update({ p2Choice: choice });
-            document.getElementById('battle-action-zone').style.pointerEvents = 'none';
-        });
-    }
+    function sendPlayerChoice(choice) { if(!networkRoomRef) return; networkRoomRef.once('value', (snapshot) => { const data = snapshot.val(); if(data.p1 === localState.activeUser) networkRoomRef.update({ p1Choice: choice }); else if(data.p2 === localState.activeUser) networkRoomRef.update({ p2Choice: choice }); document.getElementById('battle-action-zone').style.pointerEvents = 'none'; }); }
 
     function executeNetworkRoundEnd(roomData) {
-        const diceResult = Math.floor(Math.random() * 6) + 1;
-        const systemOddEven = diceResult % 2 === 0 ? 'EVEN' : '홀';
-        
-        networkRoomRef.update({ dice: `결과 주사위: ${diceResult} [${systemOddEven}]` });
-
+        const diceResult = Math.floor(Math.random() * 6) + 1; const systemOddEven = diceResult % 2 === 0 ? 'EVEN' : '홀';
+        networkRoomRef.update({ dice: '결과 주사위: ' + diceResult + ' [' + systemOddEven + ']' });
         setTimeout(() => {
             networkRoomRef.once('value', (snap) => {
-                const currentData = snap.val();
-                if(!currentData) return;
-
+                const currentData = snap.val(); if(!currentData) return;
                 if(currentData.round >= 3) {
-                    const p1Match = currentData.p1Choice === systemOddEven;
-                    const p2Match = currentData.p2Choice === systemOddEven;
-                    
-                    if(p1Match && localState.activeUser === currentData.p1) {
-                        localState.db[currentData.p1].money += (currentData.p1Bet * 10);
-                        firebase.database().ref('users/' + currentData.p1).update({ money: localState.db[currentData.p1].money });
-                    }
-                    if(p2Match && currentData.p2 && localState.activeUser === currentData.p2) {
-                        localState.db[currentData.p2].money += (currentData.p2Bet * 10);
-                        firebase.database().ref('users/' + currentData.p2).update({ money: localState.db[currentData.p2].money });
-                    }
-
-                    saveLocalDB(); syncLobbyUI();
-                    alert("3라운드 경기 종료! 적중자는 판돈의 10배 크레딧이 충전되었습니다.");
-                    networkRoomRef.remove();
-                } else {
-                    networkRoomRef.update({ round: currentData.round + 1, p1Choice: '', p2Choice: '', dice: 'READY' });
-                }
+                    const p1Match = currentData.p1Choice === systemOddEven; const p2Match = currentData.p2Choice === systemOddEven;
+                    if(p1Match && localState.activeUser === currentData.p1) { localState.db[currentData.p1].money += (currentData.p1Bet * 10); firebase.database().ref('users/' + currentData.p1).update({ money: localState.db[currentData.p1].money }); }
+                    if(p2Match && currentData.p2 && localState.activeUser === currentData.p2) { localState.db[currentData.p2].money += (currentData.p2Bet * 10); firebase.database().ref('users/' + currentData.p2).update({ money: localState.db[currentData.p2].money }); }
+                    saveLocalDB(); syncLobbyUI(); alert("3라운드 종료! 적중자 10배 크레딧 지급!"); networkRoomRef.remove();
+                } else { networkRoomRef.update({ round: currentData.round + 1, p1Choice: '', p2Choice: '', dice: 'READY' }); }
             });
         }, 3000);
     }
 
     function exitGameRoomByPlayer() {
-        if(!networkRoomRef) return;
-        networkRoomRef.once('value', (snapshot) => {
-            const data = snapshot.val();
-            if(!data) return;
-
-            localState.db[localState.activeUser].money += localState.currentBet;
-            firebase.database().ref('users/' + localState.activeUser).update({ money: localState.db[localState.activeUser].money });
-            saveLocalDB(); syncLobbyUI();
-
-            if(data.p1 === localState.activeUser) {
-                alert("방장이 퇴장하여 방이 해제됩니다. 판돈이 반환되었습니다.");
-                networkRoomRef.remove();
-            } else if(data.p2 === localState.activeUser) {
-                alert("매치에서 탈퇴했습니다. 판돈이 반환되었습니다.");
-                networkRoomRef.update({ p2: '', p2Bet: 0, p2Choice: '', status: 'waiting', dice: 'READY' });
-            }
+        if (firebaseConfig.databaseURL.includes("your-firebase-db-demo")) { localState.db[localState.activeUser].money += localState.currentBet; saveLocalDB(); syncLobbyUI(); exitGameRoom(); return; }
+        if(!networkRoomRef) return; networkRoomRef.once('value', (snapshot) => {
+            const data = snapshot.val(); if(!data) return;
+            localState.db[localState.activeUser].money += localState.currentBet; firebase.database().ref('users/' + localState.activeUser).update({ money: localState.db[localState.activeUser].money }); saveLocalDB(); syncLobbyUI();
+            if(data.p1 === localState.activeUser) { alert("방장 퇴장으로 방 해제."); networkRoomRef.remove(); }
+            else if(data.p2 === localState.activeUser) { alert("탈퇴 완료."); networkRoomRef.update({ p2: '', p2Bet: 0, p2Choice: '', status: 'waiting', dice: 'READY' }); }
             exitGameRoom();
         });
     }
 
-    function exitGameRoom() {
-        if(networkRoomRef) { networkRoomRef.off(); networkRoomRef = null; }
-        document.getElementById('battle-action-zone').style.pointerEvents = 'none';
-        switchView('view-lobby');
-    }
-</script>
+    function exitGameRoom() { if(networkRoomRef) { networkRoomRef.off(); networkRoomRef = null; } document.getElementById('battle-action-zone').style.pointerEvents = 'none'; switchView('view-lobby'); }
+    function runLocalSimulationGame(code, bet) { document.getElementById('game-room-id').innerText = 'ROOM : ' + code + ' (SIM)'; document.getElementById('game-p1-name').innerText = localState.activeUser; document.getElementById('game-p2-name').innerText = "CPU_BOT"; document.getElementById('game-mybet-view').innerText = bet.toLocaleString(); localState.db[localState.activeUser].money -= bet; saveLocalDB(); syncLobbyUI(); switchView('view-game'); document.getElementById('battle-action-zone').style.pointerEvents = 'auto'; document.getElementById('game-dice-view').innerText = "READY TO PLAY"; }
+<\/script>
+</body>
+</html>`;
+
+            // 블롭 오브젝트 활용 다운로드 트리거
+            const blob = new Blob([gameCode], { type: 'text/html;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "game.html");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>
